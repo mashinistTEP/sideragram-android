@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="SideragramTitle">Sideragram</string>
+    <string name="SideragramSubtitle">Наши звёзды и подарки</string>
+
+    <string name="SideragramBalanceTitle">Баланс звёзд Sideragram</string>
+    <string name="SideragramBalanceHint">Это баланс нашего форка. Звёзды Telegram считаются отдельно — они в пункте «Звёзды» выше.</string>
+
+    <string name="SideragramStatusNotLinked">Не привязано к нашему серверу: нажми «Привязать».</string>
+    <string name="SideragramStatusLinked">Привязано: %1$s\nСервер: %2$s</string>
+
+    <string name="SideragramLink">Привязать</string>
+    <string name="SideragramUnlink">Отвязать</string>
+    <string name="SideragramRefresh">Обновить</string>
+
+    <string name="SideragramServer">Адрес сервера</string>
+    <string name="SideragramServerSave">Сохранить адрес</string>
+    <string name="SideragramServerSaved">Адрес сохранён</string>
+
+    <string name="SideragramOps">Последние операции</string>
+    <string name="SideragramNoOps">Операций пока нет</string>
+
+    <string name="SideragramLinking">Привязываем…</string>
+    <string name="SideragramLoading">Загружаем баланс…</string>
+    <string name="SideragramLinked">Аккаунт привязан к Sideragram</string>
+    <string name="SideragramLinkFailed">Сервер не выдал токен</string>
+    <string name="SideragramNoUser">Не удалось получить аккаунт Telegram</string>
+
+    <string name="SideragramAdminTitle">Админ-Панель</string>
+    <string name="SideragramAdminSubtitle">Пользователи, звёзды, настройки форка</string>
+    <string name="SideragramAdminStats">Сводка</string>
+    <string name="SideragramAdminStatsLine">Пользователей: %1$d\nПодарков отправлено: %2$d\nЗвёзд на балансах: %3$d\nПодарков в каталоге: %4$d</string>
+    <string name="SideragramAdminSettings">Настройки форка</string>
+    <string name="SideragramAdminForkName">Название форка</string>
+    <string name="SideragramAdminWarning">Текст островка-предупреждения ({name})</string>
+    <string name="SideragramAdminSyncToken">Токен синхронизации каталога</string>
+    <string name="SideragramAdminUsernames">Админы в приложении: юзернеймы через запятую</string>
+    <string name="SideragramAdminUsers">Пользователи</string>
+    <string name="SideragramAdminNoUsers">Пока никого</string>
+    <string name="SideragramAdminGrant">Выдать</string>
+    <string name="SideragramAdminDeduct">Списать</string>
+    <string name="SideragramAdminSave">Сохранить</string>
+    <string name="SideragramAdminSaved">Сохранено</string>
+    <string name="SideragramAdminMark">админ</string>
+    <string name="SideragramAdminReason">выдача из приложения</string>
+    <string name="SideragramAdminBadAmount">Введи сумму больше нуля</string>
+</resources>

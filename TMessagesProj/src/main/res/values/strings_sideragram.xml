@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="SideragramTitle">Sideragram</string>
+    <string name="SideragramSubtitle">Our stars and gifts</string>
+
+    <string name="SideragramBalanceTitle">Sideragram star balance</string>
+    <string name="SideragramBalanceHint">This is our fork\'s balance. Telegram stars are counted separately — see “Stars” above.</string>
+
+    <string name="SideragramStatusNotLinked">Not linked to our server yet: tap “Link”.</string>
+    <string name="SideragramStatusLinked">Linked: %1$s\nServer: %2$s</string>
+
+    <string name="SideragramLink">Link</string>
+    <string name="SideragramUnlink">Unlink</string>
+    <string name="SideragramRefresh">Refresh</string>
+
+    <string name="SideragramServer">Server address</string>
+    <string name="SideragramServerSave">Save address</string>
+    <string name="SideragramServerSaved">Address saved</string>
+
+    <string name="SideragramOps">Recent operations</string>
+    <string name="SideragramNoOps">No operations yet</string>
+
+    <string name="SideragramLinking">Linking…</string>
+    <string name="SideragramLoading">Loading balance…</string>
+    <string name="SideragramLinked">Account linked to Sideragram</string>
+    <string name="SideragramLinkFailed">Server did not return a token</string>
+    <string name="SideragramNoUser">Could not read the Telegram account</string>
+
+    <string name="SideragramAdminTitle">Admin Panel</string>
+    <string name="SideragramAdminSubtitle">Users, stars, fork settings</string>
+    <string name="SideragramAdminStats">Overview</string>
+    <string name="SideragramAdminStatsLine">Users: %1$d\nGifts sent: %2$d\nStars on balances: %3$d\nGifts in catalog: %4$d</string>
+    <string name="SideragramAdminSettings">Fork settings</string>
+    <string name="SideragramAdminForkName">Fork name</string>
+    <string name="SideragramAdminWarning">Warning island text ({name})</string>
+    <string name="SideragramAdminSyncToken">Catalog sync token</string>
+    <string name="SideragramAdminUsernames">In-app admins: usernames, comma separated</string>
+    <string name="SideragramAdminUsers">Users</string>
+    <string name="SideragramAdminNoUsers">Nobody yet</string>
+    <string name="SideragramAdminGrant">Grant</string>
+    <string name="SideragramAdminDeduct">Deduct</string>
+    <string name="SideragramAdminSave">Save</string>
+    <string name="SideragramAdminSaved">Saved</string>
+    <string name="SideragramAdminMark">admin</string>
+    <string name="SideragramAdminReason">granted from app</string>
+    <string name="SideragramAdminBadAmount">Enter an amount above zero</string>
+</resources>

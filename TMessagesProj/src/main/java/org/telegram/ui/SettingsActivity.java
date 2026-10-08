@@ -130,6 +130,9 @@ import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode
 import org.telegram.ui.Components.voip.VoIPHelper;
 import org.telegram.ui.Stars.StarsController;
 import org.telegram.ui.Stars.StarsIntroActivity;
+import org.sideragram.fork.ForkStarsFragment;
+import org.sideragram.fork.ForkAdminFragment;
+import org.sideragram.fork.ForkSession;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 import org.telegram.ui.Stories.recorder.DualCameraView;
 import org.telegram.ui.TON.TONIntroActivity;
@@ -705,6 +708,10 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             long balance = c.getBalance().amount;
             items.add(SettingCell.Factory.of(12, 0xFFEFA612, 0xFFE77512, R.drawable.settings_stars, getString(R.string.TelegramStars), null, c.balanceAvailable() && balance > 0 ? StarsIntroActivity.formatStarsAmount(c.getBalance(), 0.85f, ' ') : ""));
         }
+            items.add(SettingCell.Factory.of(25, 0xFF9C27B0, 0xFF673AB7, R.drawable.settings_gift, getString(R.string.SideragramTitle), getString(R.string.SideragramSubtitle)));
+            if (ForkSession.isAdmin()) {
+                items.add(SettingCell.Factory.of(26, 0xFF2E7D32, 0xFF43A047, R.drawable.settings_features, getString(R.string.SideragramAdminTitle), getString(R.string.SideragramAdminSubtitle)));
+            }
         StarsController.getInstance(currentAccount, true).getBalance();
         if (ApplicationLoader.isBetaBuild() || ApplicationLoader.isStandaloneBuild() || ApplicationLoader.isHuaweiStoreBuild() || (StarsController.getInstance(currentAccount, true).balanceAvailable() && (StarsController.getInstance(currentAccount, true).hasTransactions() || StarsController.getInstance(currentAccount, true).getBalance().positive()))) {
             StarsController c = StarsController.getTonInstance(currentAccount);
@@ -845,6 +852,12 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 break;
             case 12:
                 presentSettingFragment(new StarsIntroActivity());
+                break;
+            case 25:
+                presentSettingFragment(new ForkStarsFragment());
+                break;
+            case 26:
+                presentSettingFragment(new ForkAdminFragment());
                 break;
             case 13:
                 presentSettingFragment(new TONIntroActivity());
