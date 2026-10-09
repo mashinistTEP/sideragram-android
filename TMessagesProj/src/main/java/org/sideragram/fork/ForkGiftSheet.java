@@ -196,7 +196,10 @@ public class ForkGiftSheet extends BottomSheet {
         }
         busy = true;
         JSONObject req = new JSONObject();
-        req.put("username", recipient);
+        try {
+            req.put("username", recipient);
+        } catch (Exception ignore) {
+        }
         ForkApi.call("app_resolve", req, new ForkApi.Callback() {
             @Override
             public void onResult(JSONObject data, String error) {
@@ -234,9 +237,12 @@ public class ForkGiftSheet extends BottomSheet {
     private void doSend(String recipient) {
         busy = true;
         JSONObject req = new JSONObject();
-        req.put("code", selectedCode);
-        req.put("recipient_username", recipient);
-        req.put("message", messageField.getText().toString().trim());
+        try {
+            req.put("code", selectedCode);
+            req.put("recipient_username", recipient);
+            req.put("message", messageField.getText().toString().trim());
+        } catch (Exception ignore) {
+        }
         ForkApi.call("app_send_gift", req, new ForkApi.Callback() {
             @Override
             public void onResult(JSONObject data, String error) {
