@@ -16,6 +16,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -53,6 +54,30 @@ public class ForkGiftSheet extends BottomSheet {
         scroll.addView(content, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         root.addView(scroll, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         setCustomView(root);
+
+        if (!ForkSession.isLinked()) {
+            // Устройство не привязано: показываем нашу карточку привязки вместо
+            // оригинального экрана Telegram — все экраны отправки подарков наши.
+            TextView note = new TextView(context);
+            note.setTextColor(0xFFB3261E);
+            note.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 15);
+            note.setText(loc(R.string.SideragramGiftsUnlinkedCard));
+            content.addView(note, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 12));
+            TextView linkBtn = new TextView(context);
+            linkBtn.setText(loc(R.string.SideragramGiftsLinkNow));
+            linkBtn.setTextColor(0xFFFFFFFF);
+            linkBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 15);
+            linkBtn.setGravity(Gravity.CENTER);
+            linkBtn.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(12), 0xFF8E74FF));
+            linkBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    doLinkAndReload();
+                }
+            });
+            content.addView(linkBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 46));
+            return;
+        }
 
         balanceView = new TextView(context);
         balanceView.setTextColor(0xFF8E74FF);
@@ -95,6 +120,40 @@ public class ForkGiftSheet extends BottomSheet {
         content.addView(send, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 46));
 
         load();
+    }
+
+    // -------------------------------------------------------------- привязка из листа
+    private void doLinkAndReload() {
+        TLRPC.User user = UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser();
+        long tgId = user == null ? 0 : user.id;
+        if (tgId == 0) {
+            return;
+        }
+        JSONObject req = new JSONObject();
+        try {
+            req.put("tg_user_id", String.valueOf(tgId));
+            req.put("tg_username", user.username == null ? "" : user.username);
+            req.put("tg_name", user.first_name == null ? "" : user.first_name);
+            req.put("device", android.os.Build.MODEL == null ? "" : android.os.Build.MODEL);
+        } catch (Exception ignore) {
+        }
+        ForkApi.call("app_link", req, new ForkApi.Callback() {
+            @Override
+            public void onResult(JSONObject data, String error) {
+                if (error != null) {
+                    return;
+                }
+                String token = data.optString("token", "");
+                JSONObject me = data.optJSONObject("me");
+                if (token.length() == 0) {
+                    return;
+                }
+                ForkSession.setAdmin(me != null && me.optInt("is_admin", 0) == 1);
+                ForkSession.saveLink(token, me == null ? "" : me.optString("name", ""));
+                dismiss();
+                new ForkGiftSheet(getContext(), dialogId).show();
+            }
+        });
     }
 
     // -------------------------------------------------------------- загрузка

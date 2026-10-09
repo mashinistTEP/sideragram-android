@@ -19,21 +19,38 @@ public class ForkSession {
         return ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
-    /** Адрес сервера без слэша на конце. */
-    public static String baseUrl() {
-        String url = prefs().getString("base_url", ForkConfig.DEFAULT_BASE_URL);
-        if (url == null || url.trim().length() == 0) {
-            url = ForkConfig.DEFAULT_BASE_URL;
+    /**
+     * Приводит адрес к рабочему виду: добавляет схему, если её нет, убирает слэши на конце.
+     * Старый https-адрес подарка AwardSpace заменяет на http: у бесплатного поддомена
+     * нет доверенного сертификата, Android отвергает такое соединение (SSLHandshakeException).
+     */
+    private static String fixUrl(String url) {
+        if (url == null) {
+            url = "";
         }
         url = url.trim();
+        if (url.length() == 0) {
+            return ForkConfig.DEFAULT_BASE_URL;
+        }
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "http://" + url;
+        }
         while (url.endsWith("/")) {
             url = url.substring(0, url.length() - 1);
+        }
+        if ("https://sideragram.atwebpages.com".equals(url)) {
+            url = "http://sideragram.atwebpages.com";
         }
         return url;
     }
 
+    /** Адрес сервера без слэша на конце. */
+    public static String baseUrl() {
+        return fixUrl(prefs().getString("base_url", ForkConfig.DEFAULT_BASE_URL));
+    }
+
     public static void setBaseUrl(String url) {
-        prefs().edit().putString("base_url", url == null ? "" : url.trim()).apply();
+        prefs().edit().putString("base_url", fixUrl(url)).apply();
     }
 
     /** Наш токен (пусто, если привязки ещё не было). */

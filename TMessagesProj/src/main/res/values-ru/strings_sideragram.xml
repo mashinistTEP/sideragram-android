@@ -15,6 +15,7 @@
 
     <string name="SideragramServer">Адрес сервера</string>
     <string name="SideragramServerSave">Сохранить адрес</string>
+    <string name="SideragramOpenTgStars">Звёзды Telegram</string>
     <string name="SideragramServerSaved">Адрес сохранён</string>
 
     <string name="SideragramOps">Последние операции</string>
@@ -76,4 +77,21 @@
     <string name="SideragramGiftsIslandNew">Тебе пришли новые подарки: %1$d</string>
     <string name="SideragramGiftsBalanceLine">Баланс: %1$d ⭐</string>
     <string name="SideragramGiftsLoadingBalance">Загружаем баланс…</string>
+    <string name="SideragramAdminAdmins">Администраторы</string>
+    <string name="SideragramAdminAddAdmin">Добавить админа</string>
+    <string name="SideragramAdminRemoveAdmin">Разжаловать</string>
+    <string name="SideragramAdminWho">Telegram ID или юзернейм</string>
+    <string name="SideragramAdminPass">Пароль админ-панели</string>
+    <string name="SideragramAdminStarsSection">Звёзды</string>
+    <string name="SideragramAdminStarsAdd">Добавить</string>
+    <string name="SideragramAdminStarsNew">Новое количество звёзд</string>
+    <string name="SideragramAdminPremiumSection">Премиум</string>
+    <string name="SideragramAdminPremiumLater">позже</string>
+    <string name="SideragramAdminDone">Готово</string>
+    <string name="SideragramAdminBadNumber">Введите целое число</string>
+    <string name="SideragramDialogOk">ОК</string>
+    <string name="SideragramDialogCancel">Отмена</string>
+    <string name="SideragramGiftsUnlinkedCard">Устройство не привязано к серверу Sideragram. Привяжите его, чтобы отправлять подарки через наш сервер.</string>
+    <string name="SideragramGiftsLinkNow">Привязать устройство</string>
+    <string name="SideragramStarsScreenTitle">Sideragram Stars</string>
 </resources>

@@ -706,7 +706,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         if (getMessagesController().starsPurchaseAvailable()) {
             StarsController c = StarsController.getInstance(currentAccount);
             long balance = c.getBalance().amount;
-            items.add(SettingCell.Factory.of(12, 0xFFEFA612, 0xFFE77512, R.drawable.settings_stars, getString(R.string.TelegramStars), null, c.balanceAvailable() && balance > 0 ? StarsIntroActivity.formatStarsAmount(c.getBalance(), 0.85f, ' ') : ""));
+            items.add(SettingCell.Factory.of(12, 0xFF9C27B0, 0xFF673AB7, R.drawable.settings_stars, org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramTitle), org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramSubtitle)));
         }
             items.add(SettingCell.Factory.of(25, 0xFF9C27B0, 0xFF673AB7, R.drawable.settings_gift, org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramTitle), org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramSubtitle)));
             if (ForkSession.isAdmin()) {
@@ -851,7 +851,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 presentSettingFragment(new PremiumPreviewFragment("settings"));
                 break;
             case 12:
-                presentSettingFragment(new StarsIntroActivity());
+                presentSettingFragment(new ForkStarsFragment());
                 break;
             case 25:
                 presentSettingFragment(new ForkStarsFragment());

@@ -16,9 +16,8 @@ public class ForkGiftRouter {
     private static long lastShownAt;
 
     public static boolean showGiftSheet(Context context, int currentAccount, long dialogId) {
-        if (!ForkSession.isLinked()) {
-            return false;
-        }
+        // Подменяем экран отправки подарков ВСЕГДА: без привязки наш лист сам
+        // предложит привязать устройство, оригинальный Telegram не показываем.
         long now = System.currentTimeMillis();
         if (now - lastShownAt < 1500) {
             // повторный вход из конструктора-делегата: лист уже показан

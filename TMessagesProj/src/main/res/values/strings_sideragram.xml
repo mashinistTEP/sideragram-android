@@ -15,6 +15,7 @@
 
     <string name="SideragramServer">Server address</string>
     <string name="SideragramServerSave">Save address</string>
+    <string name="SideragramOpenTgStars">Telegram stars</string>
     <string name="SideragramServerSaved">Address saved</string>
 
     <string name="SideragramOps">Recent operations</string>
@@ -76,4 +77,21 @@
     <string name="SideragramGiftsIslandNew">You received new gifts: %1$d</string>
     <string name="SideragramGiftsBalanceLine">Balance: %1$d ⭐</string>
     <string name="SideragramGiftsLoadingBalance">Loading balance…</string>
+    <string name="SideragramAdminAdmins">Administrators</string>
+    <string name="SideragramAdminAddAdmin">Add admin</string>
+    <string name="SideragramAdminRemoveAdmin">Demote</string>
+    <string name="SideragramAdminWho">Telegram ID or username</string>
+    <string name="SideragramAdminPass">Admin panel password</string>
+    <string name="SideragramAdminStarsSection">Stars</string>
+    <string name="SideragramAdminStarsAdd">Add</string>
+    <string name="SideragramAdminStarsNew">New star amount</string>
+    <string name="SideragramAdminPremiumSection">Premium</string>
+    <string name="SideragramAdminPremiumLater">позже</string>
+    <string name="SideragramAdminDone">Done</string>
+    <string name="SideragramAdminBadNumber">Enter a whole number</string>
+    <string name="SideragramDialogOk">OK</string>
+    <string name="SideragramDialogCancel">Cancel</string>
+    <string name="SideragramGiftsUnlinkedCard">The device is not linked to the Sideragram server. Link it to send gifts through our server.</string>
+    <string name="SideragramGiftsLinkNow">Link device</string>
+    <string name="SideragramStarsScreenTitle">Sideragram Stars</string>
 </resources>

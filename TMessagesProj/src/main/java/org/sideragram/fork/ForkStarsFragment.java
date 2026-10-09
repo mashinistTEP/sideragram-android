@@ -23,6 +23,7 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Stars.StarsIntroActivity;
 
 /**
  * Наш экран: баланс звёзд Sideragram с нашего сервера.
@@ -36,14 +37,13 @@ public class ForkStarsFragment extends BaseFragment {
     private TextView linkButton;
     private TextView adminButton;
     private TextView giftsButton;
-    private EditText serverField;
     private boolean busy;
 
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle(loc(R.string.SideragramTitle));
+        actionBar.setTitle(loc(R.string.SideragramStarsScreenTitle));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -152,7 +152,7 @@ public class ForkStarsFragment extends BaseFragment {
         card.addView(giftsButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 8, 0, 0));
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        // ---------- карточка «сервер» ----------
+        // ---------- карточка «сервер»: адрес зашит в коде, ручного ввода нет ----------
         LinearLayout serverCard = new LinearLayout(context);
         serverCard.setOrientation(LinearLayout.VERTICAL);
         serverCard.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(16), getThemedColor(Theme.key_windowBackgroundWhite)));
@@ -164,26 +164,20 @@ public class ForkStarsFragment extends BaseFragment {
         serverCaption.setText(loc(R.string.SideragramServer));
         serverCard.addView(serverCaption, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
 
-        serverField = new EditText(context);
-        serverField.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
-        serverField.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-        serverField.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        serverField.setHint(ForkConfig.DEFAULT_BASE_URL);
-        serverField.setSingleLine(true);
-        serverField.setText(ForkSession.baseUrl());
-        serverCard.addView(serverField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 0));
+        TextView serverValue = new TextView(context);
+        serverValue.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        serverValue.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
+        serverValue.setText(ForkSession.baseUrl());
+        serverCard.addView(serverValue, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 0));
 
-        TextView saveServer = makeButton(context, loc(R.string.SideragramServerSave));
-        saveServer.setOnClickListener(new View.OnClickListener() {
+        TextView tgStarsButton = makeButton(context, loc(R.string.SideragramOpenTgStars));
+        tgStarsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ForkSession.setBaseUrl(serverField.getText().toString());
-                serverField.setText(ForkSession.baseUrl());
-                toast(loc(R.string.SideragramServerSaved));
-                refresh();
+                presentFragment(new StarsIntroActivity());
             }
         });
-        serverCard.addView(saveServer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 10, 0, 0));
+        serverCard.addView(tgStarsButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 10, 0, 0));
         content.addView(serverCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 12, 0, 0));
 
         // ---------- карточка «операции» ----------

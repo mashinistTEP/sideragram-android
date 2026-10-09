@@ -9,7 +9,7 @@ package org.sideragram.fork;
 public class ForkConfig {
 
     /** Адрес нашего сервера (PHP+MySQL). Без слэша на конце. */
-    public static final String DEFAULT_BASE_URL = "https://sideragram.atwebpages.com";
+    public static final String DEFAULT_BASE_URL = "http://sideragram.atwebpages.com";
 
     /** Название форка — подставляется в тексты. */
     public static final String FORK_NAME = "Sideragram";

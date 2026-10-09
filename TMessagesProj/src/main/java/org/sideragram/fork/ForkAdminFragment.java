@@ -1,17 +1,15 @@
 package org.sideragram.fork;
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Typeface;
+import android.content.DialogInterface;
 import android.text.InputType;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,79 +22,140 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 
 /**
- * Админ-Панель Sideragram — прямо в приложении.
+ * Админ-панель Sideragram (видна только Telegram-юзернеймам из списка админов).
  *
- * Доступна тем, чей Telegram-юзернейм указан в списке админов на нашем сервере
- * (сам список меняется здесь же). Панель управляет только нашей частью:
- * наши звёзды, наши подарки, настройки форка. Экономику Telegram она не трогает.
+ * Три раздела по спецификации:
+ *   1. Администраторы — список пар «id/юзернейм», кнопки «Добавить» и «Разжаловать»
+ *      (диалог: id или юзернейм → пароль админ-панели);
+ *   2. Звёзды — список «id/юзернейм количество», тап по строке → диалог нового значения,
+ *      кнопка «Добавить» → диалог id/юзернейм → диалог количества;
+ *   3. Премиум — список «id/юзернейм дата окончания время окончания»,
+ *      тап по строке → список с одним пунктом «Позже (+30 дней)».
+ * Внизу — карточка настроек сервера (название, предупреждение, токен синхронизации).
  */
 public class ForkAdminFragment extends BaseFragment {
 
     private Context ctx;
-    private TextView statsView;
     private TextView errorView;
-    private LinearLayout usersBox;
+    private LinearLayout adminsBox;
+    private LinearLayout starsBox;
+    private LinearLayout premiumBox;
     private EditText nameField;
     private EditText warnField;
     private EditText tokenField;
-    private EditText adminsField;
+
+    private interface OnText {
+        void onText(String value);
+    }
 
     @Override
     public View createView(Context context) {
         ctx = context;
-        actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle(loc(R.string.SideragramAdminTitle));
-        actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
-            @Override
-            public void onItemClick(int id) {
-                if (id == -1) {
-                    finishFragment();
-                }
-            }
-        });
+        if (actionBar != null) {
+            actionBar.setTitle(loc(R.string.SideragramAdminTitle));
+            actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+        }
 
         FrameLayout root = new FrameLayout(context);
-        root.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
-
         ScrollView scroll = new ScrollView(context);
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(16), dp(12), dp(16), dp(24));
+        int pad = AndroidUtilities.dp(12);
+        content.setPadding(pad, pad, pad, pad);
+        scroll.addView(content, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        root.addView(scroll, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        fragmentView = root;
 
-        // ---------- сообщение об ошибке / отсутствии прав ----------
         errorView = new TextView(context);
-        errorView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        errorView.setTextColor(getThemedColor(Theme.key_text_RedRegular));
-        errorView.setPadding(dp(16), dp(12), dp(16), dp(12));
-        errorView.setBackground(Theme.createRoundRectDrawable(dp(16), getThemedColor(Theme.key_windowBackgroundWhite)));
+        errorView.setTextColor(0xFFB3261E);
+        errorView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 14);
         errorView.setVisibility(View.GONE);
-        content.addView(errorView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        content.addView(errorView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 8));
 
-        // ---------- сводка ----------
-        LinearLayout statsCard = card();
-        statsCard.addView(caption(R.string.SideragramAdminStats), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
-        statsView = new TextView(context);
-        statsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        statsView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        statsView.setPadding(0, dp(6), 0, 0);
-        statsView.setText("…");
-        statsCard.addView(statsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-        content.addView(statsCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        // ---------- администраторы ----------
+        LinearLayout adminsCard = card();
+        adminsCard.addView(caption(R.string.SideragramAdminAdmins), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+        adminsBox = new LinearLayout(context);
+        adminsBox.setOrientation(LinearLayout.VERTICAL);
+        adminsCard.addView(adminsBox, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 8));
 
-        // ---------- настройки форка ----------
-        LinearLayout setCard = card();
-        setCard.addView(caption(R.string.SideragramAdminSettings), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+        TextView addAdmin = makeButton(loc(R.string.SideragramAdminAddAdmin));
+        addAdmin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                askWhoThenPassword(true);
+            }
+        });
+        adminsCard.addView(addAdmin, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 0, 0, 8));
 
+        TextView removeAdmin = makeButton(loc(R.string.SideragramAdminRemoveAdmin));
+        removeAdmin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                askWhoThenPassword(false);
+            }
+        });
+        adminsCard.addView(removeAdmin, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44));
+        content.addView(adminsCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 12));
+
+        // ---------- звёзды ----------
+        LinearLayout starsCard = card();
+        starsCard.addView(caption(R.string.SideragramAdminStarsSection), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+        starsBox = new LinearLayout(context);
+        starsBox.setOrientation(LinearLayout.VERTICAL);
+        starsCard.addView(starsBox, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 8));
+
+        TextView addStars = makeButton(loc(R.string.SideragramAdminStarsAdd));
+        addStars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                promptText(loc(R.string.SideragramAdminStarsAdd), loc(R.string.SideragramAdminWho), false, new OnText() {
+                    @Override
+                    public void onText(final String who) {
+                        if (who.length() == 0) {
+                            return;
+                        }
+                        promptText(loc(R.string.SideragramAdminStarsNew), loc(R.string.SideragramAdminStarsNew), true, new OnText() {
+                            @Override
+                            public void onText(String value) {
+                                int amount = parseAmount(value);
+                                if (amount < 0) {
+                                    return;
+                                }
+                                JSONObject req = new JSONObject();
+                                try {
+                                    req.put("who", who);
+                                    req.put("value", amount);
+                                } catch (Exception ignore) {
+                                }
+                                call("app_admin_stars_add", req);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        starsCard.addView(addStars, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44));
+        content.addView(starsCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 12));
+
+        // ---------- премиум ----------
+        LinearLayout premiumCard = card();
+        premiumCard.addView(caption(R.string.SideragramAdminPremiumSection), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+        premiumBox = new LinearLayout(context);
+        premiumBox.setOrientation(LinearLayout.VERTICAL);
+        premiumBox.addView(plainText(loc(R.string.SideragramAdminPremiumLater)), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        premiumCard.addView(premiumBox, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        content.addView(premiumCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 12));
+
+        // ---------- настройки сервера ----------
+        LinearLayout settingsCard = card();
+        settingsCard.addView(caption(R.string.SideragramAdminSettings), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
         nameField = fieldInput(R.string.SideragramAdminForkName);
-        setCard.addView(nameField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 8, 0, 0));
+        settingsCard.addView(nameField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 6));
         warnField = fieldInput(R.string.SideragramAdminWarning);
-        setCard.addView(warnField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 8, 0, 0));
+        settingsCard.addView(warnField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 6));
         tokenField = fieldInput(R.string.SideragramAdminSyncToken);
-        setCard.addView(tokenField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 8, 0, 0));
-        adminsField = fieldInput(R.string.SideragramAdminUsernames);
-        setCard.addView(adminsField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 8, 0, 0));
-
+        settingsCard.addView(tokenField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 8));
         TextView save = makeButton(loc(R.string.SideragramAdminSave));
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,149 +163,152 @@ public class ForkAdminFragment extends BaseFragment {
                 saveSettings();
             }
         });
-        setCard.addView(save, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 12, 0, 0));
-        content.addView(setCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 12, 0, 0));
+        settingsCard.addView(save, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44));
+        content.addView(settingsCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        // ---------- пользователи ----------
-        LinearLayout usersCard = card();
-        usersCard.addView(caption(R.string.SideragramAdminUsers), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
-        usersBox = new LinearLayout(context);
-        usersBox.setOrientation(LinearLayout.VERTICAL);
-        usersCard.addView(usersBox, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-        content.addView(usersCard, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 12, 0, 0));
-
-        scroll.addView(content, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-        root.addView(scroll, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-
-        fragmentView = root;
         load();
         return fragmentView;
     }
 
-    // ================================================================
-    // данные
-    // ================================================================
-
+    // -------------------------------------------------------------- загрузка
     private void load() {
-        ForkApi.call("app_admin_panel", new JSONObject(), new ForkApi.Callback() {
+        ForkApi.call("app_admin_list", new JSONObject(), new ForkApi.Callback() {
             @Override
             public void onResult(JSONObject data, String error) {
                 if (error != null) {
                     showError(error);
                     return;
                 }
-                showError(null);
-
-                JSONObject st = data.optJSONObject("stats");
-                if (st != null) {
-                    statsView.setText(loc(R.string.SideragramAdminStatsLine,
-                            st.optInt("users", 0), st.optInt("gifts_sent", 0),
-                            st.optInt("stars_issued", 0), st.optInt("catalog", 0)));
+                errorView.setVisibility(View.GONE);
+                renderAdmins(data.optJSONArray("admins"));
+                renderStars(data.optJSONArray("stars"));
+                JSONObject settings = data.optJSONObject("settings");
+                if (settings != null) {
+                    nameField.setText(settings.optString("fork_name", ""));
+                    warnField.setText(settings.optString("gift_warning", ""));
+                    tokenField.setText(settings.optString("sync_token", ""));
                 }
-
-                JSONObject s = data.optJSONObject("settings");
-                if (s != null) {
-                    nameField.setText(s.optString("fork_name", ""));
-                    warnField.setText(s.optString("gift_warning", ""));
-                    tokenField.setText(s.optString("sync_token", ""));
-                    adminsField.setText(s.optString("admin_usernames", ""));
-                }
-
-                renderUsers(data.optJSONArray("users"));
             }
         });
     }
 
-    private void renderUsers(JSONArray users) {
-        usersBox.removeAllViews();
-        if (users == null || users.length() == 0) {
-            usersBox.addView(plainText(loc(R.string.SideragramAdminNoUsers)));
+    private void renderAdmins(JSONArray admins) {
+        adminsBox.removeAllViews();
+        if (admins == null || admins.length() == 0) {
+            adminsBox.addView(plainText("—"), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
             return;
         }
-        for (int a = 0; a < users.length(); a++) {
-            final JSONObject u = users.optJSONObject(a);
+        for (int i = 0; i < admins.length(); i++) {
+            JSONObject a = admins.optJSONObject(i);
+            if (a == null) {
+                continue;
+            }
+            long id = a.optLong("id", 0);
+            String username = a.optString("username", "");
+            String line = (id > 0 ? String.valueOf(id) : "—") + "/" + (username.length() > 0 ? username : "—");
+            adminsBox.addView(plainText(line), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 4));
+        }
+    }
+
+    private void renderStars(JSONArray stars) {
+        starsBox.removeAllViews();
+        if (stars == null || stars.length() == 0) {
+            starsBox.addView(plainText("—"), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+            return;
+        }
+        for (int i = 0; i < stars.length(); i++) {
+            JSONObject u = stars.optJSONObject(i);
             if (u == null) {
                 continue;
             }
-            final int userId = u.optInt("id", 0);
-
-            LinearLayout row = new LinearLayout(ctx);
-            row.setOrientation(LinearLayout.VERTICAL);
-            row.setPadding(0, dp(10), 0, 0);
-
-            TextView who = new TextView(ctx);
-            who.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-            who.setTypeface(Typeface.DEFAULT_BOLD);
-            who.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-            who.setText("@" + u.optString("username", "?") + " — " + u.optInt("stars", 0) + " ⭐"
-                    + (u.optInt("is_admin", 0) == 1 ? " · " + loc(R.string.SideragramAdminMark) : ""));
-            row.addView(who, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-
-            LinearLayout actions = new LinearLayout(ctx);
-            actions.setOrientation(LinearLayout.HORIZONTAL);
-
-            final EditText amount = new EditText(ctx);
-            amount.setInputType(InputType.TYPE_CLASS_NUMBER);
-            amount.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-            amount.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-            amount.setText("100");
-            amount.setSingleLine(true);
-            actions.addView(amount, LayoutHelper.createLinear(0, 42, 1f, 0, 6, 4, 0));
-
-            TextView plus = makeButton("+ " + loc(R.string.SideragramAdminGrant));
-            plus.setOnClickListener(new View.OnClickListener() {
+            final long id = u.optLong("id", 0);
+            final String username = u.optString("username", "");
+            final int amount = u.optInt("stars", 0);
+            String who = username.length() > 0 ? username : String.valueOf(id);
+            TextView row = plainText((id > 0 ? String.valueOf(id) : "—") + "/" + (username.length() > 0 ? username : "—") + "   " + amount);
+            row.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    grant(userId, readAmount(amount));
+                    promptText(loc(R.string.SideragramAdminStarsNew), loc(R.string.SideragramAdminStarsNew), true, new OnText() {
+                        @Override
+                        public void onText(String value) {
+                            int next = parseAmount(value);
+                            if (next < 0) {
+                                return;
+                            }
+                            JSONObject req = new JSONObject();
+                            try {
+                                req.put("who", username.length() > 0 ? username : String.valueOf(id));
+                                req.put("value", next);
+                            } catch (Exception ignore) {
+                            }
+                            call("app_admin_stars_set", req);
+                        }
+                    });
                 }
             });
-            actions.addView(plus, LayoutHelper.createLinear(0, 42, 1.5f, 4, 6, 4, 0));
-
-            TextView minus = makeButton("- " + loc(R.string.SideragramAdminDeduct));
-            minus.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    grant(userId, -readAmount(amount));
-                }
-            });
-            actions.addView(minus, LayoutHelper.createLinear(0, 42, 1.5f, 4, 6, 0, 0));
-
-            row.addView(actions, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-            usersBox.addView(row);
+            starsBox.addView(row, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 0, 0, 4));
         }
     }
 
-    private int readAmount(EditText field) {
-        try {
-            return Math.abs(Integer.parseInt(field.getText().toString().trim()));
-        } catch (Exception e) {
-            return 0;
-        }
+    // -------------------------------------------------------------- диалоги
+    private void askWhoThenPassword(final boolean add) {
+        promptText(add ? loc(R.string.SideragramAdminAddAdmin) : loc(R.string.SideragramAdminRemoveAdmin),
+                loc(R.string.SideragramAdminWho), false, new OnText() {
+                    @Override
+                    public void onText(final String who) {
+                        if (who.length() == 0) {
+                            return;
+                        }
+                        promptText(loc(R.string.SideragramAdminPass), loc(R.string.SideragramAdminPass), true, new OnText() {
+                            @Override
+                            public void onText(String password) {
+                                if (password.length() == 0) {
+                                    return;
+                                }
+                                JSONObject req = new JSONObject();
+                                try {
+                                    req.put("who", who);
+                                    req.put("password", password);
+                                } catch (Exception ignore) {
+                                }
+                                call(add ? "app_admin_add" : "app_admin_remove", req);
+                            }
+                        });
+                    }
+                });
     }
 
-    private void grant(int userId, int delta) {
-        if (userId <= 0 || delta == 0) {
-            toast(loc(R.string.SideragramAdminBadAmount));
-            return;
+    private void promptText(String title, String hint, boolean secret, final OnText callback) {
+        final EditText input = new EditText(ctx);
+        input.setHint(hint);
+        input.setSingleLine(true);
+        if (secret) {
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         }
-        JSONObject req = new JSONObject();
-        try {
-            req.put("user_id", userId);
-            req.put("delta", delta);
-            req.put("reason", loc(R.string.SideragramAdminReason));
-        } catch (Exception ignore) {
-        }
-        ForkApi.call("app_admin_grant", req, new ForkApi.Callback() {
+        new AlertDialog.Builder(ctx)
+                .setTitle(title)
+                .setView(input)
+                .setPositiveButton(loc(R.string.SideragramDialogOk), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        callback.onText(input.getText().toString().trim());
+                    }
+                })
+                .setNegativeButton(loc(R.string.SideragramDialogCancel), null)
+                .show();
+    }
+
+    // -------------------------------------------------------------- запросы
+    private void call(String action, JSONObject req) {
+        ForkApi.call(action, req, new ForkApi.Callback() {
             @Override
             public void onResult(JSONObject data, String error) {
                 if (error != null) {
-                    toast(error);
+                    showError(error);
                     return;
                 }
-                JSONObject u = data.optJSONObject("user");
-                toast(u == null
-                        ? loc(R.string.SideragramAdminSaved)
-                        : "@" + u.optString("username", "") + " — " + u.optInt("stars", 0) + " ⭐");
+                toast(loc(R.string.SideragramAdminDone));
                 load();
             }
         });
@@ -258,78 +320,74 @@ public class ForkAdminFragment extends BaseFragment {
             req.put("fork_name", nameField.getText().toString().trim());
             req.put("gift_warning", warnField.getText().toString().trim());
             req.put("sync_token", tokenField.getText().toString().trim());
-            req.put("admin_usernames", adminsField.getText().toString().trim());
         } catch (Exception ignore) {
         }
         ForkApi.call("app_admin_settings", req, new ForkApi.Callback() {
             @Override
             public void onResult(JSONObject data, String error) {
                 if (error != null) {
-                    toast(error);
+                    showError(error);
                     return;
                 }
-                toast(loc(R.string.SideragramAdminSaved));
-                load();
+                toast(loc(R.string.SideragramAdminDone));
             }
         });
     }
 
-    // ================================================================
-    // мелкая отрисовка
-    // ================================================================
-
-    private int dp(int value) {
-        return AndroidUtilities.dp(value);
+    private int parseAmount(String value) {
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (Exception e) {
+            toast(loc(R.string.SideragramAdminBadNumber));
+            return -1;
+        }
     }
 
+    // -------------------------------------------------------------- виджеты
     private LinearLayout card() {
-        LinearLayout card = new LinearLayout(ctx);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackground(Theme.createRoundRectDrawable(dp(16), getThemedColor(Theme.key_windowBackgroundWhite)));
-        card.setPadding(dp(16), dp(16), dp(16), dp(16));
-        return card;
+        LinearLayout box = new LinearLayout(ctx);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(16), getThemedColor(Theme.key_windowBackgroundWhite)));
+        box.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16));
+        return box;
     }
 
     private TextView caption(int stringRes) {
-        TextView t = new TextView(ctx);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
-        t.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
-        t.setText(loc(stringRes));
-        return t;
+        TextView view = new TextView(ctx);
+        view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 13);
+        view.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
+        view.setText(loc(stringRes));
+        return view;
     }
 
     private TextView plainText(String text) {
-        TextView t = new TextView(ctx);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        t.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        t.setPadding(0, dp(8), 0, 0);
-        t.setText(text);
-        return t;
+        TextView view = new TextView(ctx);
+        view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 15);
+        view.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
+        view.setText(text);
+        return view;
     }
 
     private EditText fieldInput(int hintRes) {
         EditText field = new EditText(ctx);
-        field.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        field.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-        field.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
         field.setHint(loc(hintRes));
+        field.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 14);
+        field.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
         return field;
     }
 
     private TextView makeButton(String text) {
-        TextView button = new TextView(ctx);
-        button.setText(text);
-        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-        button.setTypeface(Typeface.DEFAULT_BOLD);
-        button.setGravity(Gravity.CENTER);
-        button.setTextColor(getThemedColor(Theme.key_featuredStickers_buttonText));
-        button.setBackground(Theme.createRoundRectDrawable(dp(10), getThemedColor(Theme.key_featuredStickers_addButton)));
-        return button;
+        TextView view = new TextView(ctx);
+        view.setText(text);
+        view.setTextColor(0xFFFFFFFF);
+        view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 15);
+        view.setGravity(android.view.Gravity.CENTER);
+        view.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(12), 0xFF2E7D32));
+        return view;
     }
 
     private void showError(String error) {
-        if (error == null) {
-            errorView.setVisibility(View.GONE);
+        if (errorView == null) {
             return;
         }
         errorView.setText(error);
@@ -337,7 +395,7 @@ public class ForkAdminFragment extends BaseFragment {
     }
 
     private void toast(String text) {
-        Toast.makeText(ApplicationLoader.applicationContext, text, Toast.LENGTH_SHORT).show();
+        android.widget.Toast.makeText(ApplicationLoader.applicationContext, text, android.widget.Toast.LENGTH_SHORT).show();
     }
 
     private String loc(int res) {
