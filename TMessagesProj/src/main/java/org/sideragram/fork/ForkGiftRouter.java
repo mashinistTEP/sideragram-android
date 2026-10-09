@@ -40,7 +40,7 @@ public class ForkGiftRouter {
         }
         try {
             org.telegram.tgnet.TLRPC.User user =
-                    org.telegram.ui.MessagesController.getInstance(currentAccount).getUser(dialogId);
+                    org.telegram.messenger.MessagesController.getInstance(currentAccount).getUser(dialogId);
             if (user != null && user.username != null) {
                 return user.username;
             }
