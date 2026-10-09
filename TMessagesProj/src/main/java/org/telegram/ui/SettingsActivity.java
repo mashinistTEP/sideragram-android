@@ -708,9 +708,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             long balance = c.getBalance().amount;
             items.add(SettingCell.Factory.of(12, 0xFFEFA612, 0xFFE77512, R.drawable.settings_stars, getString(R.string.TelegramStars), null, c.balanceAvailable() && balance > 0 ? StarsIntroActivity.formatStarsAmount(c.getBalance(), 0.85f, ' ') : ""));
         }
-            items.add(SettingCell.Factory.of(25, 0xFF9C27B0, 0xFF673AB7, R.drawable.settings_gift, getString(R.string.SideragramTitle), getString(R.string.SideragramSubtitle)));
+            items.add(SettingCell.Factory.of(25, 0xFF9C27B0, 0xFF673AB7, R.drawable.settings_gift, org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramTitle), org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramSubtitle)));
             if (ForkSession.isAdmin()) {
-                items.add(SettingCell.Factory.of(26, 0xFF2E7D32, 0xFF43A047, R.drawable.settings_features, getString(R.string.SideragramAdminTitle), getString(R.string.SideragramAdminSubtitle)));
+                items.add(SettingCell.Factory.of(26, 0xFF2E7D32, 0xFF43A047, R.drawable.settings_features, org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramAdminTitle), org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramAdminSubtitle)));
             }
         StarsController.getInstance(currentAccount, true).getBalance();
         if (ApplicationLoader.isBetaBuild() || ApplicationLoader.isStandaloneBuild() || ApplicationLoader.isHuaweiStoreBuild() || (StarsController.getInstance(currentAccount, true).balanceAvailable() && (StarsController.getInstance(currentAccount, true).hasTransactions() || StarsController.getInstance(currentAccount, true).getBalance().positive()))) {

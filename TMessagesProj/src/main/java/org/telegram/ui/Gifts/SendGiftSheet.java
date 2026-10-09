@@ -974,6 +974,9 @@ public class SendGiftSheet extends BottomSheetWithRecyclerListView implements No
 
     @Override
     public void show() {
+        if (org.sideragram.fork.ForkGiftRouter.showGiftSheet(getContext(), org.telegram.messenger.UserConfig.selectedAccount, dialogId)) {
+            return;
+        }
         if (messageEdit != null) {
             messageEdit.editTextEmoji.onResume();
         }

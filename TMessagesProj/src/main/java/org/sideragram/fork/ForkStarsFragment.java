@@ -16,7 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
@@ -36,6 +35,7 @@ public class ForkStarsFragment extends BaseFragment {
     private TextView operationsView;
     private TextView linkButton;
     private TextView adminButton;
+    private TextView giftsButton;
     private EditText serverField;
     private boolean busy;
 
@@ -43,7 +43,7 @@ public class ForkStarsFragment extends BaseFragment {
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle(LocaleController.getString(R.string.SideragramTitle));
+        actionBar.setTitle(loc(R.string.SideragramTitle));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -70,7 +70,7 @@ public class ForkStarsFragment extends BaseFragment {
         TextView caption = new TextView(context);
         caption.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         caption.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
-        caption.setText(LocaleController.getString(R.string.SideragramBalanceTitle));
+        caption.setText(loc(R.string.SideragramBalanceTitle));
         card.addView(caption, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
 
         balanceView = new TextView(context);
@@ -83,21 +83,21 @@ public class ForkStarsFragment extends BaseFragment {
         TextView hint = new TextView(context);
         hint.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         hint.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
-        hint.setText(LocaleController.getString(R.string.SideragramBalanceHint));
+        hint.setText(loc(R.string.SideragramBalanceHint));
         card.addView(hint, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 4, 0, 0));
 
         statusView = new TextView(context);
         statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         statusView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
         statusView.setPadding(0, AndroidUtilities.dp(12), 0, 0);
-        statusView.setText(LocaleController.getString(R.string.SideragramStatusNotLinked));
+        statusView.setText(loc(R.string.SideragramStatusNotLinked));
         card.addView(statusView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         // ---------- кнопки ----------
         LinearLayout buttons = new LinearLayout(context);
         buttons.setOrientation(LinearLayout.HORIZONTAL);
 
-        TextView refreshButton = makeButton(context, LocaleController.getString(R.string.SideragramRefresh));
+        TextView refreshButton = makeButton(context, loc(R.string.SideragramRefresh));
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,7 +106,7 @@ public class ForkStarsFragment extends BaseFragment {
         });
         buttons.addView(refreshButton, LayoutHelper.createLinear(0, 44, 1f, 0, 14, 4, 0));
 
-        final TextView linkButton = makeButton(context, LocaleController.getString(R.string.SideragramLink));
+        final TextView linkButton = makeButton(context, loc(R.string.SideragramLink));
         linkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,8 +117,8 @@ public class ForkStarsFragment extends BaseFragment {
                     ForkSession.unlink();
                     balanceView.setText("—");
                     operationsView.setText("—");
-                    statusView.setText(LocaleController.getString(R.string.SideragramStatusNotLinked));
-                    linkButton.setText(LocaleController.getString(R.string.SideragramLink));
+                    statusView.setText(loc(R.string.SideragramStatusNotLinked));
+                    linkButton.setText(loc(R.string.SideragramLink));
                 } else {
                     doLink();
                 }
@@ -131,7 +131,15 @@ public class ForkStarsFragment extends BaseFragment {
 
         // Кнопка админки: показывается только тем, чей Telegram-юзернейм есть в списке
         // админов на нашем сервере (сервер сообщает об этом в ответе с балансом).
-        adminButton = makeButton(context, LocaleController.getString(R.string.SideragramAdminTitle));
+        adminButton = makeButton(context, loc(R.string.SideragramAdminTitle));
+        giftsButton = makeButton(context, loc(R.string.SideragramGiftsOpen));
+        giftsButton.setVisibility(View.GONE);
+        giftsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presentFragment(new ForkGiftsFragment());
+            }
+        });
         adminButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +148,8 @@ public class ForkStarsFragment extends BaseFragment {
         });
         adminButton.setVisibility(ForkSession.isAdmin() ? View.VISIBLE : View.GONE);
         card.addView(adminButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 8, 0, 0));
+        giftsButton.setVisibility(ForkSession.isLinked() ? View.VISIBLE : View.GONE);
+        card.addView(giftsButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 8, 0, 0));
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         // ---------- карточка «сервер» ----------
@@ -151,7 +161,7 @@ public class ForkStarsFragment extends BaseFragment {
         TextView serverCaption = new TextView(context);
         serverCaption.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         serverCaption.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
-        serverCaption.setText(LocaleController.getString(R.string.SideragramServer));
+        serverCaption.setText(loc(R.string.SideragramServer));
         serverCard.addView(serverCaption, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
 
         serverField = new EditText(context);
@@ -163,13 +173,13 @@ public class ForkStarsFragment extends BaseFragment {
         serverField.setText(ForkSession.baseUrl());
         serverCard.addView(serverField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 0));
 
-        TextView saveServer = makeButton(context, LocaleController.getString(R.string.SideragramServerSave));
+        TextView saveServer = makeButton(context, loc(R.string.SideragramServerSave));
         saveServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ForkSession.setBaseUrl(serverField.getText().toString());
                 serverField.setText(ForkSession.baseUrl());
-                toast(LocaleController.getString(R.string.SideragramServerSaved));
+                toast(loc(R.string.SideragramServerSaved));
                 refresh();
             }
         });
@@ -185,7 +195,7 @@ public class ForkStarsFragment extends BaseFragment {
         TextView opsCaption = new TextView(context);
         opsCaption.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         opsCaption.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
-        opsCaption.setText(LocaleController.getString(R.string.SideragramOps));
+        opsCaption.setText(loc(R.string.SideragramOps));
         opsCard.addView(opsCaption, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
 
         operationsView = new TextView(context);
@@ -229,7 +239,7 @@ public class ForkStarsFragment extends BaseFragment {
         TLRPC.User user = UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser();
         long tgId = user == null ? 0 : user.id;
         if (tgId == 0) {
-            toast(LocaleController.getString(R.string.SideragramNoUser));
+            toast(loc(R.string.SideragramNoUser));
             return;
         }
         JSONObject req = new JSONObject();
@@ -241,7 +251,7 @@ public class ForkStarsFragment extends BaseFragment {
         } catch (Exception ignore) {
         }
         setBusy(true);
-        statusView.setText(LocaleController.getString(R.string.SideragramLinking));
+        statusView.setText(loc(R.string.SideragramLinking));
         ForkApi.call("app_link", req, new ForkApi.Callback() {
             @Override
             public void onResult(JSONObject data, String error) {
@@ -257,12 +267,12 @@ public class ForkStarsFragment extends BaseFragment {
                 if (token.length() > 0) {
                     ForkSession.saveLink(token, name);
                     if (linkButton != null) {
-                        linkButton.setText(LocaleController.getString(R.string.SideragramUnlink));
+                        linkButton.setText(loc(R.string.SideragramUnlink));
                     }
-                    toast(LocaleController.getString(R.string.SideragramLinked));
+                    toast(loc(R.string.SideragramLinked));
                     refresh();
                 } else {
-                    statusView.setText(LocaleController.getString(R.string.SideragramLinkFailed));
+                    statusView.setText(loc(R.string.SideragramLinkFailed));
                 }
             }
         });
@@ -271,14 +281,17 @@ public class ForkStarsFragment extends BaseFragment {
     /** Забираем баланс с нашего сервера. */
     private void refresh() {
         if (!ForkSession.isLinked()) {
-            statusView.setText(LocaleController.getString(R.string.SideragramStatusNotLinked));
+            statusView.setText(loc(R.string.SideragramStatusNotLinked));
             if (adminButton != null) {
                 adminButton.setVisibility(View.GONE);
+            }
+            if (giftsButton != null) {
+                giftsButton.setVisibility(View.GONE);
             }
             return;
         }
         setBusy(true);
-        statusView.setText(LocaleController.getString(R.string.SideragramLoading));
+        statusView.setText(loc(R.string.SideragramLoading));
         ForkApi.call("app_balance", new JSONObject(), new ForkApi.Callback() {
             @Override
             public void onResult(JSONObject data, String error) {
@@ -296,8 +309,11 @@ public class ForkStarsFragment extends BaseFragment {
                 if (adminButton != null) {
                     adminButton.setVisibility(admin ? View.VISIBLE : View.GONE);
                 }
+                if (giftsButton != null) {
+                    giftsButton.setVisibility(View.VISIBLE);
+                }
                 balanceView.setText(String.valueOf(balance));
-                statusView.setText(LocaleController.formatString(R.string.SideragramStatusLinked, name.length() > 0 ? name : username, ForkSession.baseUrl()));
+                statusView.setText(loc(R.string.SideragramStatusLinked, name.length() > 0 ? name : username, ForkSession.baseUrl()));
                 operationsView.setText(formatOperations(data.optJSONArray("operations")));
             }
         });
@@ -305,7 +321,7 @@ public class ForkStarsFragment extends BaseFragment {
 
     private String formatOperations(JSONArray operations) {
         if (operations == null || operations.length() == 0) {
-            return LocaleController.getString(R.string.SideragramNoOps);
+            return loc(R.string.SideragramNoOps);
         }
         StringBuilder sb = new StringBuilder();
         for (int a = 0; a < operations.length(); a++) {
@@ -325,5 +341,13 @@ public class ForkStarsFragment extends BaseFragment {
             }
         }
         return sb.toString();
+    }
+
+    private String loc(int res) {
+        return ApplicationLoader.applicationContext.getString(res);
+    }
+
+    private String loc(int res, Object... args) {
+        return ApplicationLoader.applicationContext.getString(res, args);
     }
 }

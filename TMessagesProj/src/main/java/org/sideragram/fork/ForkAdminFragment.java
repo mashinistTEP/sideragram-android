@@ -17,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -47,7 +46,7 @@ public class ForkAdminFragment extends BaseFragment {
         ctx = context;
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle(LocaleController.getString(R.string.SideragramAdminTitle));
+        actionBar.setTitle(loc(R.string.SideragramAdminTitle));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -98,7 +97,7 @@ public class ForkAdminFragment extends BaseFragment {
         adminsField = fieldInput(R.string.SideragramAdminUsernames);
         setCard.addView(adminsField, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 8, 0, 0));
 
-        TextView save = makeButton(LocaleController.getString(R.string.SideragramAdminSave));
+        TextView save = makeButton(loc(R.string.SideragramAdminSave));
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,7 +139,7 @@ public class ForkAdminFragment extends BaseFragment {
 
                 JSONObject st = data.optJSONObject("stats");
                 if (st != null) {
-                    statsView.setText(LocaleController.formatString(R.string.SideragramAdminStatsLine,
+                    statsView.setText(loc(R.string.SideragramAdminStatsLine,
                             st.optInt("users", 0), st.optInt("gifts_sent", 0),
                             st.optInt("stars_issued", 0), st.optInt("catalog", 0)));
                 }
@@ -161,7 +160,7 @@ public class ForkAdminFragment extends BaseFragment {
     private void renderUsers(JSONArray users) {
         usersBox.removeAllViews();
         if (users == null || users.length() == 0) {
-            usersBox.addView(plainText(LocaleController.getString(R.string.SideragramAdminNoUsers)));
+            usersBox.addView(plainText(loc(R.string.SideragramAdminNoUsers)));
             return;
         }
         for (int a = 0; a < users.length(); a++) {
@@ -180,7 +179,7 @@ public class ForkAdminFragment extends BaseFragment {
             who.setTypeface(Typeface.DEFAULT_BOLD);
             who.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
             who.setText("@" + u.optString("username", "?") + " — " + u.optInt("stars", 0) + " ⭐"
-                    + (u.optInt("is_admin", 0) == 1 ? " · " + LocaleController.getString(R.string.SideragramAdminMark) : ""));
+                    + (u.optInt("is_admin", 0) == 1 ? " · " + loc(R.string.SideragramAdminMark) : ""));
             row.addView(who, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             LinearLayout actions = new LinearLayout(ctx);
@@ -194,7 +193,7 @@ public class ForkAdminFragment extends BaseFragment {
             amount.setSingleLine(true);
             actions.addView(amount, LayoutHelper.createLinear(0, 42, 1f, 0, 6, 4, 0));
 
-            TextView plus = makeButton("+ " + LocaleController.getString(R.string.SideragramAdminGrant));
+            TextView plus = makeButton("+ " + loc(R.string.SideragramAdminGrant));
             plus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -203,7 +202,7 @@ public class ForkAdminFragment extends BaseFragment {
             });
             actions.addView(plus, LayoutHelper.createLinear(0, 42, 1.5f, 4, 6, 4, 0));
 
-            TextView minus = makeButton("- " + LocaleController.getString(R.string.SideragramAdminDeduct));
+            TextView minus = makeButton("- " + loc(R.string.SideragramAdminDeduct));
             minus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -227,14 +226,14 @@ public class ForkAdminFragment extends BaseFragment {
 
     private void grant(int userId, int delta) {
         if (userId <= 0 || delta == 0) {
-            toast(LocaleController.getString(R.string.SideragramAdminBadAmount));
+            toast(loc(R.string.SideragramAdminBadAmount));
             return;
         }
         JSONObject req = new JSONObject();
         try {
             req.put("user_id", userId);
             req.put("delta", delta);
-            req.put("reason", LocaleController.getString(R.string.SideragramAdminReason));
+            req.put("reason", loc(R.string.SideragramAdminReason));
         } catch (Exception ignore) {
         }
         ForkApi.call("app_admin_grant", req, new ForkApi.Callback() {
@@ -246,7 +245,7 @@ public class ForkAdminFragment extends BaseFragment {
                 }
                 JSONObject u = data.optJSONObject("user");
                 toast(u == null
-                        ? LocaleController.getString(R.string.SideragramAdminSaved)
+                        ? loc(R.string.SideragramAdminSaved)
                         : "@" + u.optString("username", "") + " — " + u.optInt("stars", 0) + " ⭐");
                 load();
             }
@@ -269,7 +268,7 @@ public class ForkAdminFragment extends BaseFragment {
                     toast(error);
                     return;
                 }
-                toast(LocaleController.getString(R.string.SideragramAdminSaved));
+                toast(loc(R.string.SideragramAdminSaved));
                 load();
             }
         });
@@ -295,7 +294,7 @@ public class ForkAdminFragment extends BaseFragment {
         TextView t = new TextView(ctx);
         t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         t.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
-        t.setText(LocaleController.getString(stringRes));
+        t.setText(loc(stringRes));
         return t;
     }
 
@@ -313,7 +312,7 @@ public class ForkAdminFragment extends BaseFragment {
         field.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         field.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         field.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        field.setHint(LocaleController.getString(hintRes));
+        field.setHint(loc(hintRes));
         return field;
     }
 
@@ -339,5 +338,13 @@ public class ForkAdminFragment extends BaseFragment {
 
     private void toast(String text) {
         Toast.makeText(ApplicationLoader.applicationContext, text, Toast.LENGTH_SHORT).show();
+    }
+
+    private String loc(int res) {
+        return ApplicationLoader.applicationContext.getString(res);
+    }
+
+    private String loc(int res, Object... args) {
+        return ApplicationLoader.applicationContext.getString(res, args);
     }
 }

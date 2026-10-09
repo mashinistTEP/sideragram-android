@@ -695,6 +695,9 @@ public class GiftSheet extends BottomSheetWithRecyclerListView implements Notifi
 
     @Override
     public void show() {
+        if (org.sideragram.fork.ForkGiftRouter.showGiftSheet(getContext(), org.telegram.messenger.UserConfig.selectedAccount, dialogId)) {
+            return;
+        }
         if (MessagesController.getInstance(currentAccount).isFrozen()) {
             AccountFrozenAlert.show(currentAccount);
             return;
