@@ -1,8 +1,6 @@
 package org.sideragram.fork;
 
-import org.telegram.ui.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
@@ -288,41 +286,24 @@ public class ForkAdminFragment extends BaseFragment {
     }
 
     private void promptText(String title, String hint, boolean secret, final OnText callback) {
-        final EditText input = new EditText(ctx);
-        input.setHint(hint);
-        input.setSingleLine(true);
-        if (secret) {
-            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        }
-        new AlertDialog.Builder(ctx)
-                .setTitle(title)
-                .setView(input)
-                .setPositiveButton(loc(R.string.SideragramDialogOk), new AlertDialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.onText(input.getText().toString().trim());
-                    }
-                })
-                .setNegativeButton(loc(R.string.SideragramDialogCancel), null)
-                .show();
+        int type = secret
+                ? (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
+                : InputType.TYPE_CLASS_TEXT;
+        new ForkPromptSheet(ctx, title, hint, type, new ForkPromptSheet.Callback() {
+            @Override
+            public void onValue(String value) {
+                callback.onText(value);
+            }
+        }).show();
     }
 
     private void promptAmount(String title, final OnText callback) {
-        final EditText input = new EditText(ctx);
-        input.setHint(title);
-        input.setSingleLine(true);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        new AlertDialog.Builder(ctx)
-                .setTitle(title)
-                .setView(input)
-                .setPositiveButton(loc(R.string.SideragramDialogOk), new AlertDialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.onText(input.getText().toString().trim());
-                    }
-                })
-                .setNegativeButton(loc(R.string.SideragramDialogCancel), null)
-                .show();
+        new ForkPromptSheet(ctx, title, title, InputType.TYPE_CLASS_NUMBER, new ForkPromptSheet.Callback() {
+            @Override
+            public void onValue(String value) {
+                callback.onText(value);
+            }
+        }).show();
     }
 
     // -------------------------------------------------------------- запросы
