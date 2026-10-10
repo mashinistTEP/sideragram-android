@@ -201,6 +201,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         StarsController.getInstance(currentAccount).invalidateTransactions(true);
         StarsController.getInstance(currentAccount).invalidateSubscriptions(true);
         StarsController.getInstance(currentAccount).getOptions();
+        org.sideragram.fork.ForkBalance.refresh(currentAccount);
         return super.onFragmentCreate();
     }
 
@@ -291,7 +292,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         iconTextureView.mRenderer.updateColors();
         iconTextureView.setStarParticlesView(particlesView);
         aboveTitleView.addView(iconTextureView, LayoutHelper.createFrame(190, 190, Gravity.CENTER, 0, 12, 0, 24));
-        configureHeader(getString(R.string.TelegramStars), AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(getString(R.string.TelegramStarsInfo2), () -> {
+        configureHeader(org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.SideragramStarsScreenTitle), AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(getString(R.string.TelegramStarsInfo2), () -> {
             new ExplainStarsSheet(context).show();
         }), true), aboveTitleView, null);
 
@@ -417,7 +418,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
         BotStarsController.getInstance(currentAccount).preloadStarsStats(getUserConfig().getClientUserId());
         final TLRPC.TL_payments_starsRevenueStats stats = BotStarsController.getInstance(currentAccount).getStarsRevenueStats(getUserConfig().getClientUserId());
-        updateButtonsLayouts(s.getBalance().amount > 0 && stats != null && stats.status != null && stats.status.overall_revenue.positive(), false);
+        updateButtonsLayouts(org.sideragram.fork.ForkBalance.wrap(s.getBalance()).amount > 0 && stats != null && stats.status != null && stats.status.overall_revenue.positive(), false);
 
         return fragmentView;
     }
@@ -427,10 +428,10 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
         final SpannableStringBuilder sb = new SpannableStringBuilder();
         sb.append(starBalanceIcon);
-        sb.append(formatStarsAmount(s.getBalance(), 0.66f, ' '));
+        sb.append(formatStarsAmount(org.sideragram.fork.ForkBalance.wrap(s.getBalance()), 0.66f, ' '));
         starBalanceTextView.setText(sb);
 
-        buyButton.setText(LocaleController.getString(s.getBalance().amount > 0 ? R.string.StarsBuyMore : R.string.StarsBuy), true);
+        buyButton.setText(LocaleController.getString(org.sideragram.fork.ForkBalance.wrap(s.getBalance()).amount > 0 ? R.string.StarsBuyMore : R.string.StarsBuy), true);
 
         final TLRPC.TL_payments_starsRevenueStats stats = BotStarsController.getInstance(currentAccount).getStarsRevenueStats(getUserConfig().getClientUserId());
         updateButtonsLayouts(stats != null && stats.status != null && stats.status.overall_revenue.positive(), true);
@@ -879,7 +880,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             long balance;
             if (dialogId == UserConfig.getInstance(currentAccount).getClientUserId()) {
                 loading = !c.balanceAvailable();
-                balance = c.getBalance().amount;
+                balance = org.sideragram.fork.ForkBalance.wrap(c.getBalance()).amount;
 
                 if (tc != null) {
                     loading |= !tc.balanceAvailable();
@@ -2485,7 +2486,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
         @Override
         public void show() {
-            long balance = StarsController.getInstance(currentAccount).getBalance().amount;
+            long balance = org.sideragram.fork.ForkBalance.wrap(StarsController.getInstance(currentAccount).getBalance()).amount;
             BaseFragment lastFragment = LaunchActivity.getLastFragment();
             if (lastFragment instanceof ChatActivity) {
                 ChatActivity chatActivity = (ChatActivity) lastFragment;
@@ -2644,7 +2645,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                 if (adapter != null) {
                     adapter.update(true);
                 }
-                long balance = StarsController.getInstance(currentAccount).getBalance().amount;
+                long balance = org.sideragram.fork.ForkBalance.wrap(StarsController.getInstance(currentAccount).getBalance()).amount;
                 headerView.titleView.setText(formatPluralStringComma("StarsNeededTitle", (int) (starsNeeded - balance)));
                 if (actionBar != null) {
                     actionBar.setTitle(getTitle());
@@ -2670,7 +2671,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             }
 
 
-            long balance = StarsController.getInstance(currentAccount).getBalance().amount;
+            long balance = org.sideragram.fork.ForkBalance.wrap(StarsController.getInstance(currentAccount).getBalance()).amount;
             if (balance >= starsNeeded) {
                 if (whenPurchased != null) {
                     whenPurchased.run();
@@ -2752,7 +2753,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             this.starsNeeded = starsNeeded;
             headerView = new HeaderView(context, currentAccount, resourcesProvider);
 
-            long balance = StarsController.getInstance(currentAccount).getBalance().amount;
+            long balance = org.sideragram.fork.ForkBalance.wrap(StarsController.getInstance(currentAccount).getBalance()).amount;
             headerView.titleView.setText(formatPluralString("StarsNeededTitle", (int) Math.max(0, starsNeeded - balance)));
             String stringRes;
             if (type == TYPE_SUBSCRIPTION_BUY) {
@@ -3079,7 +3080,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
             headerView = new HeaderView(context, currentAccount, resourcesProvider);
 
-//            long balance = StarsController.getInstance(currentAccount).getBalance();
+//            long balance = org.sideragram.fork.ForkBalance.wrap(StarsController.getInstance(currentAccount).getBalance());
             headerView.titleView.setText(getString(R.string.GiftStarsTitle));
             headerView.subtitleView.setText(
                 TextUtils.concat(

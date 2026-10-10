@@ -154,7 +154,9 @@ public class ForkGiftsFragment extends BaseFragment {
 
         LinearLayout shop = card();
         caption(R.string.SideragramGiftsTitle, shop);
-        JSONArray catalog = data.optJSONArray("catalog");
+        JSONArray tgCatalog = data.optJSONArray("tg_catalog");
+        JSONArray catalog = tgCatalog != null && tgCatalog.length() > 0
+                ? tgCatalog : data.optJSONArray("catalog");
         if (catalog == null || catalog.length() == 0) {
             shop.addView(plainText(loc(R.string.SideragramGiftsEmpty)),
                     LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
@@ -283,42 +285,19 @@ public class ForkGiftsFragment extends BaseFragment {
             island(ForkIslandView.TYPE_WARN, loc(R.string.SideragramGiftsNoRecipient), null);
             return;
         }
-        busy = true;
-        JSONObject req = new JSONObject();
-        try {
-            req.put("username", recipient);
-        } catch (Exception ignore) {
-        }
-        ForkApi.call("app_resolve", req, new ForkApi.Callback() {
+        // Никаких блокировок: отправлять можно любому, в том числе себе.
+        String warn = warningText.length() > 0
+                ? warningText.replace("{name}", "Sideragram")
+                : loc(R.string.SideragramGiftsWarnDefault);
+        island(ForkIslandView.TYPE_WARN, warn, new ForkIslandView.Confirm() {
             @Override
-            public void onResult(JSONObject data, String error) {
-                busy = false;
-                if (error != null) {
-                    island(ForkIslandView.TYPE_DANGER, error, null);
-                    return;
-                }
-                if (!data.optBoolean("linked", false)) {
-                    island(ForkIslandView.TYPE_DANGER, loc(R.string.SideragramGiftsNotLinkedUser), null);
-                    return;
-                }
-                if (data.optBoolean("is_self", false)) {
-                    island(ForkIslandView.TYPE_WARN, loc(R.string.SideragramGiftsSelf), null);
-                    return;
-                }
-                String warn = warningText.length() > 0
-                        ? warningText.replace("{name}", "Sideragram")
-                        : loc(R.string.SideragramGiftsWarnDefault);
-                island(ForkIslandView.TYPE_WARN, warn, new ForkIslandView.Confirm() {
-                    @Override
-                    public void onConfirm() {
-                        doSend(recipient);
-                    }
+            public void onConfirm() {
+                doSend(recipient);
+            }
 
-                    @Override
-                    public void onCancel() {
-                        // пользователь передумал
-                    }
-                });
+            @Override
+            public void onCancel() {
+                // пользователь передумал
             }
         });
     }
@@ -337,11 +316,7 @@ public class ForkGiftsFragment extends BaseFragment {
             public void onResult(JSONObject data, String error) {
                 busy = false;
                 if (error != null) {
-                    if ("RECIPIENT_NOT_LINKED".equals(error)) {
-                        island(ForkIslandView.TYPE_DANGER, loc(R.string.SideragramGiftsNotLinkedUser), null);
-                    } else {
-                        island(ForkIslandView.TYPE_DANGER, error, null);
-                    }
+                    island(ForkIslandView.TYPE_DANGER, error, null);
                     return;
                 }
                 island(ForkIslandView.TYPE_OK, loc(R.string.SideragramGiftsSent, selectedTitle), null);

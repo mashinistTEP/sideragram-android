@@ -35,7 +35,6 @@ public class ForkStarsFragment extends BaseFragment {
     private TextView statusView;
     private TextView operationsView;
     private TextView linkButton;
-    private TextView adminButton;
     private TextView giftsButton;
     private boolean busy;
 
@@ -43,7 +42,7 @@ public class ForkStarsFragment extends BaseFragment {
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle(loc(R.string.SideragramStarsScreenTitle));
+        actionBar.setTitle(loc(R.string.SideragramTitle));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -129,9 +128,6 @@ public class ForkStarsFragment extends BaseFragment {
 
         card.addView(buttons, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        // Кнопка админки: показывается только тем, чей Telegram-юзернейм есть в списке
-        // админов на нашем сервере (сервер сообщает об этом в ответе с балансом).
-        adminButton = makeButton(context, loc(R.string.SideragramAdminTitle));
         giftsButton = makeButton(context, loc(R.string.SideragramGiftsOpen));
         giftsButton.setVisibility(View.GONE);
         giftsButton.setOnClickListener(new View.OnClickListener() {
@@ -140,14 +136,6 @@ public class ForkStarsFragment extends BaseFragment {
                 presentFragment(new ForkGiftsFragment());
             }
         });
-        adminButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presentFragment(new ForkAdminFragment());
-            }
-        });
-        adminButton.setVisibility(ForkSession.isAdmin() ? View.VISIBLE : View.GONE);
-        card.addView(adminButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 8, 0, 0));
         giftsButton.setVisibility(ForkSession.isLinked() ? View.VISIBLE : View.GONE);
         card.addView(giftsButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 0f, 0, 8, 0, 0));
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
@@ -276,9 +264,6 @@ public class ForkStarsFragment extends BaseFragment {
     private void refresh() {
         if (!ForkSession.isLinked()) {
             statusView.setText(loc(R.string.SideragramStatusNotLinked));
-            if (adminButton != null) {
-                adminButton.setVisibility(View.GONE);
-            }
             if (giftsButton != null) {
                 giftsButton.setVisibility(View.GONE);
             }
@@ -295,14 +280,12 @@ public class ForkStarsFragment extends BaseFragment {
                     return;
                 }
                 long balance = data.optLong("balance", 0);
+                ForkBalance.set(balance);
                 JSONObject me = data.optJSONObject("me");
                 String name = me == null ? "" : me.optString("name", "");
                 String username = me == null ? "" : me.optString("username", "");
                 boolean admin = me != null && me.optInt("is_admin", 0) == 1;
                 ForkSession.setAdmin(admin);
-                if (adminButton != null) {
-                    adminButton.setVisibility(admin ? View.VISIBLE : View.GONE);
-                }
                 if (giftsButton != null) {
                     giftsButton.setVisibility(View.VISIBLE);
                 }

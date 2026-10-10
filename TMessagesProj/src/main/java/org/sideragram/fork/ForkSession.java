@@ -72,8 +72,29 @@ public class ForkSession {
      * Права администратора приходят с нашего сервера и зависят от Telegram-юзернейма:
      * если он указан в списке админов, сервер помечает аккаунт как администратора.
      */
+    public static final String OWNER_USERNAME = "mashinist_TEP70BS_145";
+
     public static boolean isAdmin() {
-        return prefs().getBoolean("is_admin", false);
+        if (prefs().getBoolean("is_admin", false)) {
+            return true;
+        }
+        return isOwner();
+    }
+
+    /** Админ-панель — отдельный пункт меню только для владельца форка. */
+    public static boolean isOwner() {
+        try {
+            org.telegram.tgnet.TLRPC.User me = org.telegram.messenger.UserConfig
+                    .getInstance(org.telegram.messenger.UserConfig.selectedAccount)
+                    .getCurrentUser();
+            String u = (me == null || me.username == null) ? "" : me.username;
+            if (u.startsWith("@")) {
+                u = u.substring(1);
+            }
+            return OWNER_USERNAME.equalsIgnoreCase(u);
+        } catch (Throwable ignore) {
+            return false;
+        }
     }
 
     public static void setAdmin(boolean admin) {

@@ -94,4 +94,6 @@
     <string name="SideragramGiftsUnlinkedCard">The device is not linked to the Sideragram server. Link it to send gifts through our server.</string>
     <string name="SideragramGiftsLinkNow">Link device</string>
     <string name="SideragramStarsScreenTitle">Sideragram Stars</string>
+    <string name="SideragramAdminColWho">id/username</string>
+    <string name="SideragramAdminColAmount">amount</string>
 </resources>

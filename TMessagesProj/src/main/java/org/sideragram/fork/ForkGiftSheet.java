@@ -120,6 +120,12 @@ public class ForkGiftSheet extends BottomSheet {
         content.addView(send, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 46));
 
         load();
+        ForkGiftSync.harvest(org.telegram.messenger.UserConfig.selectedAccount, dialogId, new Runnable() {
+            @Override
+            public void run() {
+                load();
+            }
+        });
     }
 
     // -------------------------------------------------------------- привязка из листа
@@ -166,8 +172,11 @@ public class ForkGiftSheet extends BottomSheet {
                     return;
                 }
                 warningText = data.optString("warning", "");
-                balanceView.setText(loc(R.string.SideragramGiftsBalanceLine, data.optInt("balance", 0)));
-                renderGrid(data.optJSONArray("catalog"));
+                int balance = data.optInt("balance", 0);
+                ForkBalance.set(balance);
+                balanceView.setText(loc(R.string.SideragramGiftsBalanceLine, balance));
+                org.json.JSONArray tg = data.optJSONArray("tg_catalog");
+                renderGrid(tg != null && tg.length() > 0 ? tg : data.optJSONArray("catalog"));
             }
         });
     }
@@ -253,42 +262,19 @@ public class ForkGiftSheet extends BottomSheet {
             island(ForkIslandView.TYPE_WARN, loc(R.string.SideragramGiftsNoRecipient), null);
             return;
         }
-        busy = true;
-        JSONObject req = new JSONObject();
-        try {
-            req.put("username", recipient);
-        } catch (Exception ignore) {
-        }
-        ForkApi.call("app_resolve", req, new ForkApi.Callback() {
+        // Никаких блокировок: отправлять можно любому, в том числе себе.
+        String warn = warningText.length() > 0
+                ? warningText.replace("{name}", ForkConfig.FORK_NAME)
+                : loc(R.string.SideragramGiftsWarnDefault);
+        island(ForkIslandView.TYPE_WARN, warn, new ForkIslandView.Confirm() {
             @Override
-            public void onResult(JSONObject data, String error) {
-                busy = false;
-                if (error != null) {
-                    island(ForkIslandView.TYPE_DANGER, error, null);
-                    return;
-                }
-                if (!data.optBoolean("linked", false)) {
-                    island(ForkIslandView.TYPE_DANGER, loc(R.string.SideragramGiftsNotLinkedUser), null);
-                    return;
-                }
-                if (data.optBoolean("is_self", false)) {
-                    island(ForkIslandView.TYPE_WARN, loc(R.string.SideragramGiftsSelf), null);
-                    return;
-                }
-                String warn = warningText.length() > 0
-                        ? warningText.replace("{name}", ForkConfig.FORK_NAME)
-                        : loc(R.string.SideragramGiftsWarnDefault);
-                island(ForkIslandView.TYPE_WARN, warn, new ForkIslandView.Confirm() {
-                    @Override
-                    public void onConfirm() {
-                        doSend(recipient);
-                    }
+            public void onConfirm() {
+                doSend(recipient);
+            }
 
-                    @Override
-                    public void onCancel() {
-                        // передумал
-                    }
-                });
+            @Override
+            public void onCancel() {
+                // передумал
             }
         });
     }
@@ -307,9 +293,7 @@ public class ForkGiftSheet extends BottomSheet {
             public void onResult(JSONObject data, String error) {
                 busy = false;
                 if (error != null) {
-                    island(ForkIslandView.TYPE_DANGER,
-                            "RECIPIENT_NOT_LINKED".equals(error)
-                                    ? loc(R.string.SideragramGiftsNotLinkedUser) : error, null);
+                    island(ForkIslandView.TYPE_DANGER, error, null);
                     return;
                 }
                 island(ForkIslandView.TYPE_OK, loc(R.string.SideragramGiftsSent, selectedTitle), null);

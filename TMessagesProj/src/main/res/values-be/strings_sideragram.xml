@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="SideragramTitle">Sideragram</string>
+    <string name="SideragramSubtitle">Нашы зоркі і падарункі</string>
+
+    <string name="SideragramBalanceTitle">Баланс зорак Sideragram</string>
+    <string name="SideragramBalanceHint">Гэта баланс нашага форка. Зоркі Telegram лічацца асобна — яны ў пункце «Stars» вышэй.</string>
+
+    <string name="SideragramStatusNotLinked">Не прывязана да нашага сервера: націсні «Прывязаць».</string>
+    <string name="SideragramStatusLinked">Прывязана: %1$s\nСервер: %2$s</string>
+
+    <string name="SideragramLink">Прывязаць</string>
+    <string name="SideragramUnlink">Адвязаць</string>
+    <string name="SideragramRefresh">Абнавіць</string>
+
+    <string name="SideragramServer">Адрас сервера</string>
+    <string name="SideragramServerSave">Захаваць адрас</string>
+    <string name="SideragramOpenTgStars">Зоркі Telegram</string>
+    <string name="SideragramServerSaved">Адрас захаваны</string>
+
+    <string name="SideragramOps">Апошнія аперацыі</string>
+    <string name="SideragramNoOps">Аперацый пакуль няма</string>
+
+    <string name="SideragramLinking">Прывязваем…</string>
+    <string name="SideragramLoading">Загружаем баланс…</string>
+    <string name="SideragramLinked">Акаўнт прывязаны да Sideragram</string>
+    <string name="SideragramLinkFailed">Сервер не выдаў токен</string>
+    <string name="SideragramNoUser">Не ўдалося атрымаць акаўнт Telegram</string>
+
+    <string name="SideragramAdminTitle">Адмін-Панэль</string>
+    <string name="SideragramAdminSubtitle">Карыстальнікі, зоркі, налады форка</string>
+    <string name="SideragramAdminStats">Зводка</string>
+    <string name="SideragramAdminStatsLine">Карыстальнікаў: %1$d\nПадарункаў адпраўлена: %2$d\nЗорак на балансах: %3$d\nПадарункаў у каталогу: %4$d</string>
+    <string name="SideragramAdminSettings">Налады форка</string>
+    <string name="SideragramAdminForkName">Назва форка</string>
+    <string name="SideragramAdminWarning">Тэкст астравочка-папярэджання ({name})</string>
+    <string name="SideragramAdminSyncToken">Токен сінхранізацыі каталога</string>
+    <string name="SideragramAdminUsernames">Адміны ў дадатку: юзернеймы праз коску</string>
+    <string name="SideragramAdminUsers">Карыстальнікі</string>
+    <string name="SideragramAdminNoUsers">Пакуль нікога</string>
+    <string name="SideragramAdminGrant">Выдаць</string>
+    <string name="SideragramAdminDeduct">Спісаць</string>
+    <string name="SideragramAdminSave">Захаваць</string>
+    <string name="SideragramAdminSaved">Захавана</string>
+    <string name="SideragramAdminMark">адмін</string>
+    <string name="SideragramAdminReason">выдача з дадатку</string>
+    <string name="SideragramAdminBadAmount">Увядзі суму большую за нуль</string>
+    <string name="SideragramGiftsScreenTitle">Падарункі Sideragram</string>
+    <string name="SideragramGiftsOpen">Нашы падарункі</string>
+    <string name="SideragramGiftsTitle">🎁 Нашы падарункі</string>
+    <string name="SideragramGiftsSendTitle">Адпраўка падарунка</string>
+    <string name="SideragramGiftsRecipient">@username атрымальніка</string>
+    <string name="SideragramGiftsMessage">Паведамленне (не абавязкова)</string>
+    <string name="SideragramGiftsNothingSelected">Падарунак не выбраны — націсні «Падарыць» у спісе</string>
+    <string name="SideragramGiftsSelected">Выбрана: %1$s</string>
+    <string name="SideragramGiftsSend">Падарыць</string>
+    <string name="SideragramGiftsSendNow">Адправіць падарунак…</string>
+    <string name="SideragramGiftsEmpty">Падарункаў пакуль няма</string>
+    <string name="SideragramGiftsReceived">📥 Атрыманыя падарункі</string>
+    <string name="SideragramGiftsTgReceived">📦 Падарункі Telegram</string>
+    <string name="SideragramGiftsTgCatalog">Люстэрка каталога Telegram</string>
+    <string name="SideragramGiftsTgHint">Гэтыя падарункі жывуць у Telegram. Люстэрка абнаўляецца сінхранізацыяй.</string>
+    <string name="SideragramGiftsTgEmpty">Люстэрка пустое: сінхранізацыя яшчэ не даслала каталог</string>
+    <string name="SideragramGiftsKindRegular">звычайны</string>
+    <string name="SideragramGiftsKindLimited">лімітаваны</string>
+    <string name="SideragramGiftsKindUnique">унікальны</string>
+    <string name="SideragramGiftsFrom">ад %1$s</string>
+    <string name="SideragramGiftsNew">НОВЫ</string>
+    <string name="SideragramGiftsPickFirst">Спачатку выберы падарунак у спісе</string>
+    <string name="SideragramGiftsNoRecipient">Пакажы @username атрымальніка</string>
+    <string name="SideragramGiftsNotLinkedUser">Гэты карыстальнік не прывязаны да Sideragram — падарунак ён не атрымае</string>
+    <string name="SideragramGiftsSelf">Сабе падарунак адправіць нельга</string>
+    <string name="SideragramGiftsWarnDefault">Падарунак прыйдзе толькі ўнутры Sideragram: звычайны Telegram такія не дастаўляе.</string>
+    <string name="SideragramGiftsConfirmSend">Адправіць</string>
+    <string name="SideragramGiftsCancel">Адмена</string>
+    <string name="SideragramGiftsSent">Падарунак «%1$s» адпраўлены 🎁</string>
+    <string name="SideragramGiftsIslandNew">Табе прыйшлі новыя падарункі: %1$d</string>
+    <string name="SideragramGiftsBalanceLine">Баланс: %1$d ⭐</string>
+    <string name="SideragramGiftsLoadingBalance">Загружаем баланс…</string>
+    <string name="SideragramAdminAdmins">Адміністратары</string>
+    <string name="SideragramAdminAddAdmin">Дадаць адміна</string>
+    <string name="SideragramAdminRemoveAdmin">Разжалаваць</string>
+    <string name="SideragramAdminWho">Telegram ID або юзернейм</string>
+    <string name="SideragramAdminPass">Пароль адмін-панэлі</string>
+    <string name="SideragramAdminStarsSection">Зоркі</string>
+    <string name="SideragramAdminStarsAdd">Дадаць</string>
+    <string name="SideragramAdminStarsNew">Новая колькасць зорак</string>
+    <string name="SideragramAdminPremiumSection">Прэміум</string>
+    <string name="SideragramAdminPremiumLater">пазней</string>
+    <string name="SideragramAdminDone">Гатова</string>
+    <string name="SideragramAdminBadNumber">Увядзіце цэлы лік</string>
+    <string name="SideragramDialogOk">ОК</string>
+    <string name="SideragramDialogCancel">Адмена</string>
+    <string name="SideragramGiftsUnlinkedCard">Прылада не прывязана да сервера Sideragram. Прывяжыце яе, каб адпраўляць падарункі праз наш сервер.</string>
+    <string name="SideragramGiftsLinkNow">Прывязаць прыладу</string>
+    <string name="SideragramStarsScreenTitle">Sideragram Stars</string>
+    <string name="SideragramAdminColWho">айдзі/юз</string>
+    <string name="SideragramAdminColAmount">кол-касць</string>
+</resources>

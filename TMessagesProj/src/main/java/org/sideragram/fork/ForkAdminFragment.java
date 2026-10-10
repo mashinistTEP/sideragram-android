@@ -1,6 +1,6 @@
 package org.sideragram.fork;
 
-import android.app.AlertDialog;
+import org.telegram.ui.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.InputType;
@@ -77,6 +77,7 @@ public class ForkAdminFragment extends BaseFragment {
         adminsCard.addView(caption(R.string.SideragramAdminAdmins), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
         adminsBox = new LinearLayout(context);
         adminsBox.setOrientation(LinearLayout.VERTICAL);
+        adminsCard.addView(headerRow(loc(R.string.SideragramAdminColWho), ""), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 4));
         adminsCard.addView(adminsBox, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 8));
 
         TextView addAdmin = makeButton(loc(R.string.SideragramAdminAddAdmin));
@@ -103,6 +104,7 @@ public class ForkAdminFragment extends BaseFragment {
         starsCard.addView(caption(R.string.SideragramAdminStarsSection), LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
         starsBox = new LinearLayout(context);
         starsBox.setOrientation(LinearLayout.VERTICAL);
+        starsCard.addView(headerRow(loc(R.string.SideragramAdminColWho), loc(R.string.SideragramAdminColAmount)), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 4));
         starsCard.addView(starsBox, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 0, 6, 0, 8));
 
         TextView addStars = makeButton(loc(R.string.SideragramAdminStarsAdd));
@@ -115,7 +117,7 @@ public class ForkAdminFragment extends BaseFragment {
                         if (who.length() == 0) {
                             return;
                         }
-                        promptText(loc(R.string.SideragramAdminStarsNew), loc(R.string.SideragramAdminStarsNew), true, new OnText() {
+                        promptAmount(loc(R.string.SideragramAdminStarsNew), new OnText() {
                             @Override
                             public void onText(String value) {
                                 int amount = parseAmount(value);
@@ -225,11 +227,17 @@ public class ForkAdminFragment extends BaseFragment {
             final String username = u.optString("username", "");
             final int amount = u.optInt("stars", 0);
             String who = username.length() > 0 ? username : String.valueOf(id);
-            TextView row = plainText((id > 0 ? String.valueOf(id) : "—") + "/" + (username.length() > 0 ? username : "—") + "   " + amount);
+            LinearLayout row = new LinearLayout(ctx);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            TextView left = plainText((id > 0 ? String.valueOf(id) : "—") + "/" + (username.length() > 0 ? username : "—"));
+            row.addView(left, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
+            TextView right = plainText(String.valueOf(amount));
+            right.setGravity(android.view.Gravity.RIGHT);
+            row.addView(right, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
             row.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    promptText(loc(R.string.SideragramAdminStarsNew), loc(R.string.SideragramAdminStarsNew), true, new OnText() {
+                    promptAmount(loc(R.string.SideragramAdminStarsNew), new OnText() {
                         @Override
                         public void onText(String value) {
                             int next = parseAmount(value);
@@ -289,7 +297,25 @@ public class ForkAdminFragment extends BaseFragment {
         new AlertDialog.Builder(ctx)
                 .setTitle(title)
                 .setView(input)
-                .setPositiveButton(loc(R.string.SideragramDialogOk), new DialogInterface.OnClickListener() {
+                .setPositiveButton(loc(R.string.SideragramDialogOk), new AlertDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        callback.onText(input.getText().toString().trim());
+                    }
+                })
+                .setNegativeButton(loc(R.string.SideragramDialogCancel), null)
+                .show();
+    }
+
+    private void promptAmount(String title, final OnText callback) {
+        final EditText input = new EditText(ctx);
+        input.setHint(title);
+        input.setSingleLine(true);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        new AlertDialog.Builder(ctx)
+                .setTitle(title)
+                .setView(input)
+                .setPositiveButton(loc(R.string.SideragramDialogOk), new AlertDialog.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         callback.onText(input.getText().toString().trim());
@@ -376,13 +402,32 @@ public class ForkAdminFragment extends BaseFragment {
         return field;
     }
 
+    private LinearLayout headerRow(String left, String right) {
+        LinearLayout row = new LinearLayout(ctx);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        TextView l = new TextView(ctx);
+        l.setText(left);
+        l.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 13);
+        l.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
+        row.addView(l, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
+        if (right != null && right.length() > 0) {
+            TextView r = new TextView(ctx);
+            r.setText(right);
+            r.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 13);
+            r.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText2));
+            r.setGravity(android.view.Gravity.RIGHT);
+            row.addView(r, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+        }
+        return row;
+    }
+
     private TextView makeButton(String text) {
         TextView view = new TextView(ctx);
         view.setText(text);
         view.setTextColor(0xFFFFFFFF);
         view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 15);
         view.setGravity(android.view.Gravity.CENTER);
-        view.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(12), 0xFF2E7D32));
+        view.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(12), 0xFF3390EC));
         return view;
     }
 
